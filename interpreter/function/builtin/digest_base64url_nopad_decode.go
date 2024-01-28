@@ -3,6 +3,7 @@
 package builtin
 
 import (
+	"strings"
 	"encoding/base64"
 
 	"github.com/ysugimoto/falco/interpreter/context"
@@ -37,10 +38,13 @@ func Digest_base64url_nopad_decode(ctx *context.Context, args ...value.Value) (v
 	}
 
 	input := value.Unwrap[*value.String](args[0])
-	dec, err := base64.RawURLEncoding.DecodeString(input.Value)
-	if err != nil {
-		return value.Null, err
-	}
+	inputStr := strings.ReplaceAll(input.Value, "=", "")
+	dec, _ := base64.URLEncoding.DecodeString(inputStr)
+	decStr := removeNullTerminator(string(dec))
+	// if err != nil {
+	// 	return value.Null, err
+	// }
 
-	return &value.String{Value: string(dec)}, nil
+	return &value.String{Value: decStr}, nil
 }
+
